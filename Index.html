@@ -3,71 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Instagram Responsive Grid</title>
+    <title>Instagram Image Gallery</title>
     <style>
         body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
             font-family: Arial, sans-serif;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            background-color: #f0f0f0;
             margin: 0;
-            padding: 0;
-            background: #f0f0f0;
-        }
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); /* Automatically adjust based on screen size */
-            grid-gap: 10px;
-            width: 100%;
-            max-width: 1200px;
             padding: 20px;
-            box-sizing: border-box;
         }
-        .grid-item {
-            border: 1px solid #ddd;
-            border-radius: 5px;
+        .image-card {
+            background-color: white;
+            width: 300px;
+            margin: 10px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             overflow: hidden;
-            position: relative;
-            box-sizing: border-box;
-            background-color: #fff;
+        }
+        .image-card img {
+            width: 100%;
+            height: auto;
+        }
+        .image-card .description {
             padding: 10px;
-        }
-        .instagram-media {
-            width: 100%; /* Ensure media covers the container width */
-            height: auto; /* Adjust height automatically */
-            box-sizing: border-box;
-        }
-
-        /* Ensure single column on mobile */
-        @media (max-width: 768px) {
-            .grid {
-                grid-template-columns: 1fr; /* Single column layout for mobile */
-            }
         }
     </style>
 </head>
 <body>
-    <div class="grid" id="grid-container">
-        <!-- Placeholder for Instagram embeds -->
-    </div>
+    <div id="gallery"></div>
 
-    <script async src="//www.instagram.com/embed.js"></script>
     <script>
-        // Example function to inject Instagram embeds (assuming you have the actual links)
-        document.addEventListener('DOMContentLoaded', function() {
-            const urls = ['https://www.instagram.com/p/Example1/', 'https://www.instagram.com/p/Example2/']; // Replace with actual URLs
-            const container = document.querySelector('.grid');
-            urls.forEach(url => {
-                const item = document.createElement('div');
-                item.className = 'grid-item';
-                item.innerHTML = `<blockquote class="instagram-media" data-instgrm-permalink="${url}" data-instgrm-version="12"></blockquote>`;
-                container.appendChild(item);
-            });
-            if (typeof instgrm !== 'undefined') {
-                instgrm.Embeds.process(); // Process all Instagram embeds after adding them
-            }
-        });
+        // Google Spreadsheet ID and API Key
+        const sheetID = '1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms'; // 실제 스프레드시트 ID로 변경하세요
+        const sheetName = 'Sheet1';  // 시트 이름
+        const apiKey = 'AIzaSyA-abc123_4xyz-567opqRStuvWXYZaBc'; // 실제 Google API 키로 변경하세요
+
+        // Fetch data from Google Sheets
+        fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetID}/values/${sheetName}?key=${apiKey}`)
+            .then(response => response.json())
+            .then(data => {
+                const rows = data.values;
+                const gallery = document.getElementById('gallery');
+
+                // Skip header row and iterate over rows
+                for (let i = 1; i < rows.length; i++) {
+                    const imageUrl = rows[i][0]; // Assuming the image URL is in the first column
+                    const description = rows[i][1] || ''; // Assuming description is in the second column
+                    
+                    // Create image card
+                    const card = document.createElement('div');
+                    card.className = 'image-card';
+
+                    const img = document.createElement('img');
+                    img.src = imageUrl;
+                    img.alt = description;
+
+                    const desc = document.createElement('div');
+                    desc.className = 'description';
+                    desc.textContent = description;
+
+                    card.appendChild(img);
+                    card.appendChild(desc);
+                    gallery.appendChild(card);
+                }
+            })
+            .catch(error => console.error('Error fetching data:', error));
     </script>
 </body>
 </html>
